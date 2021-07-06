@@ -6,7 +6,7 @@ import(
 	"testing"
 )
 
-func Test_ScanBytes(t *testing.T) {
+func Test_ScanBytes(t *testing.T) {//byte列の最初の文字を取得する関数
 	type args struct {
 		data []byte
 		atEOF bool
@@ -38,6 +38,51 @@ func Test_ScanBytes(t *testing.T) {
 				panic(err)
 			}
 			assert.Equal(t, advance, 1)
+			assert.Equal(t, test.expected, sut)
+		})
+	}
+}
+
+
+func Test_ScanLines(t *testing.T) {
+	type args struct {
+		data []byte
+		atEOF bool
+	}
+	tests := map[string]struct {
+		args args
+		expected []byte
+	}{
+		"一行をdataとして与えると全て取得する。": {
+			args: args{
+				data: []byte("Hello, World."),
+				atEOF: true,
+			},
+			expected: []byte("Hello, World."),
+		},
+		"二行をdataとして与えると最初の1行を取得する。": {
+			args: args{
+				data: []byte("Hello,\nWorld."),
+				atEOF: true,
+			},
+			expected: []byte("Hello,"),
+		},
+		"raw文字列で改行をすると最初の1行を取得できる。": {
+			args: args{
+				data: []byte(
+					`Hello,
+					World`),
+				atEOF: true,
+			},
+			expected: []byte("Hello,"),
+		},
+	}
+	for tName, test := range tests {
+		t.Run(tName, func(t *testing.T) {
+			_, sut, err := bufio.ScanLines(test.args.data, test.args.atEOF)
+			if err != nil {
+				panic(err)
+			}		
 			assert.Equal(t, test.expected, sut)
 		})
 	}
