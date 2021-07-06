@@ -87,3 +87,53 @@ func Test_ScanLines(t *testing.T) {
 		})
 	}
 }
+
+func Test_ScanRune(t *testing.T) {
+	type args struct {
+		data []byte
+		atEOF bool
+	}
+	tests := map[string]struct {
+		args args
+		expected []byte
+	}{
+		"英字": {
+			args: args{
+				data: []byte("Hello, World."),
+				atEOF: true,
+			},
+			expected: []byte("H"),
+		},
+
+		"数字": {
+			args: args{
+				data : []byte("1234"),
+				atEOF: true,
+			},
+			expected: []byte("1"),
+		},
+		"日本語": {
+			args: args{
+				data : []byte("こんにちは"),
+				atEOF: true,
+			},
+			expected: []byte("こ"),
+		},
+		"絵文字": {
+			args: args{
+				data : []byte("😭これ"),
+				atEOF: true,
+			},
+			expected: []byte("😭"),
+		},
+	}
+	for tName, test := range tests {
+		t.Run(tName, func(t *testing.T) {
+			_, sut, err := bufio.ScanRunes(test.args.data, test.args.atEOF)
+			if err != nil {
+				panic(err)
+			}
+			assert.Equal(t, test.expected, sut)
+		})
+	}
+}
