@@ -2,11 +2,13 @@ package io
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
 	"fmt"
 	"time"
 	"testing"
 	"strings"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Copy(t *testing.T) {
@@ -89,7 +91,7 @@ func Test_CopyN(t *testing.T) {
 func Test_Pipe(t *testing.T) {
 	r, w := io.Pipe()
 	go func() {
-		time.Sleep(3000 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 		fmt.Fprintf(w, "some io.Reader stream to be read\n")
 		w.Close()
 	}()
@@ -97,3 +99,35 @@ func Test_Pipe(t *testing.T) {
 		panic(err)
 	}
 } 
+
+func Test_ReadAll(t *testing.T) {
+	type args struct {
+		r io.Reader
+	}
+	tests := map[string]struct {
+		args args
+		expected []byte
+	}{
+		"改行なし": {
+			args: args{
+				r: strings.NewReader("Go is a general-purpose language designed with systems programming in mind."),
+			},
+			expected: []byte("Go is a general-purpose language designed with systems programming in mind."),
+		},
+		"改行あり": {
+			args: args{
+				r: strings.NewReader("Go is a general-purpose language designed with systems programming in mind.\n ok?"),
+			},
+			expected: []byte("Go is a general-purpose language designed with systems programming in mind.\n ok?"),
+		},
+	}
+	for tName, test := range tests {
+		t.Run(tName, func(t *testing.T) {
+			sut, err := ioutil.ReadAll(test.args.r)
+			if err != nil {
+				panic(err)
+			}
+			assert.Equal(t, sut, test.expected)
+		})
+	}
+}
