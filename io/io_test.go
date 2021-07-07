@@ -56,3 +56,30 @@ func Test_CopyBuffer(t *testing.T) {//Copyとほぼ変わらない。bufferを�
 		})
 	}
 }
+
+func Test_CopyN(t *testing.T) {
+	type args struct {
+		dst io.Writer
+		src io.Reader
+		n 	int64
+	}
+	tests := map[string]struct{
+		args args
+	}{
+		"使い方": {
+			args: args{
+				src: strings.NewReader("some io.Reader stream to be read"),
+				dst: os.Stdout,
+				n: 14,
+			},
+		},
+	}
+	for tName, test := range tests {
+		t.Run(tName, func(t *testing.T) {
+			if _, err := io.CopyN(test.args.dst, test.args.src, test.args.n); err != nil {
+				panic(err)
+			}
+		})
+	}
+
+}
