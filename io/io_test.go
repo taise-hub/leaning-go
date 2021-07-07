@@ -3,6 +3,8 @@ package io
 import (
 	"io"
 	"os"
+	"fmt"
+	"time"
 	"testing"
 	"strings"
 )
@@ -83,3 +85,15 @@ func Test_CopyN(t *testing.T) {
 	}
 
 }
+
+func Test_Pipe(t *testing.T) {
+	r, w := io.Pipe()
+	go func() {
+		time.Sleep(3000 * time.Millisecond)
+		fmt.Fprintf(w, "some io.Reader stream to be read\n")
+		w.Close()
+	}()
+	if _, err := io.Copy(os.Stdout, r); err != nil {
+		panic(err)
+	}
+} 
